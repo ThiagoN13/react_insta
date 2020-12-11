@@ -1,134 +1,126 @@
-import { AppLoading } from "expo";
-import { Asset } from "expo-asset";
+import React from 'react';
+import { TouchableOpacity, Image, StyleSheet, View } from 'react-native';
 import Constants from "expo-constants";
-import React from "react";
-import { Animated, Button, StyleSheet, Text, View } from "react-native";
-import * as SplashScreen from "expo-splash-screen";
-// import * as Updates from "expo-updates";
+import Feed from './src/pages/Feed';
+import Login from './src/pages/Login';
+import Likes from './src/pages/Likes';
+import Coments from './src/pages/Comment';
+import AnimatedAppLoader from './src/components/AnimatedAppLoader'
+import { createStackNavigator } from '@react-navigation/stack';
+import { NavigationContainer } from '@react-navigation/native'
 
-// Instruct SplashScreen not to hide yet, we want to do this manually
-SplashScreen.preventAutoHideAsync().catch(() => {});
+import igtv from './src/assets/igtv.png';
+import send from './src/assets/send.png';
 
-export default function App() {
-  return (
-    <AnimatedAppLoader image={{ uri: Constants.manifest.splash.image }}>
-      <MainScreen />
-    </AnimatedAppLoader>
-  );
-}
+const Stack = createStackNavigator()
 
-function AnimatedAppLoader({ children, image }) {
-  const [isSplashReady, setSplashReady] = React.useState(false);
-
-  const startAsync = React.useMemo(
-    // If you use a local image with require(...), use `Asset.fromModule`
-    () => () => Asset.fromURI(image).downloadAsync(),
-    [image]
-  );
-
-  const onFinish = React.useMemo(() => setSplashReady(true), []);
-
-  if (!isSplashReady) {
+export default class App extends React.Component {
+  constructor () {
+    super()
+  }
+  
+  render () {
     return (
-      <AppLoading
-        startAsync={startAsync}
-        onError={console.error}
-        onFinish={onFinish}
-      />
+      <AnimatedAppLoader image={{ uri: Constants.manifest.splash.image }}>
+        <View style={style.container}>
+          <NavigationContainer>
+            <Stack.Navigator initialRouteName="Login">
+              <Stack.Screen
+                name="Feed"
+                component={Feed}
+                options={{
+                  headerTitleStyle: { alignSelf: 'center' },
+                  headerStyle: { height: 100 },
+                  headerTitle:
+                    <>
+                      <View style={style.logo}>
+                        <Image source={require('./src/assets/logo.png')} />
+                      </View>
+                    </>,
+                  headerLeft: () => (
+                    <TouchableOpacity style={style.camera}>
+                      <Image source={require('./src/assets/camera.png')} />
+                    </TouchableOpacity>
+                  ),
+                  headerRight: () => (
+                    <View style={{ flexDirection: 'row' }}>
+                      <TouchableOpacity style={style.igtv}>
+                        <Image source={igtv} />
+                      </TouchableOpacity>
+
+                      <TouchableOpacity style={style.send}>
+                        <Image source={send} />
+                      </TouchableOpacity>
+                    </View>
+                  )
+                }}
+              />
+  
+              <Stack.Screen
+                name="Login"
+                component={Login}
+                options={{
+                  headerShown: false,
+                  headerTitleAlign: 'center',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  headerTintColor: '#000'
+                }}
+              />
+  
+              <Stack.Screen
+                name="Likes"
+                component={Likes}
+                options={{
+                  headerStyle: { height: 100 },
+                  headerTitleAlign: 'center',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  headerTintColor: '#000'
+                }}
+              />
+  
+              <Stack.Screen
+                name="Comments"
+                component={Coments}
+                options={{
+                  headerStyle: { height: 100 },
+                  headerTitleAlign: 'center',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  headerTintColor: '#000'
+                }}
+              />
+            </Stack.Navigator>
+          </NavigationContainer>
+        </View>
+      </AnimatedAppLoader>
     );
   }
-
-  return <AnimatedSplashScreen image={image}>{children}</AnimatedSplashScreen>;
 }
 
-function AnimatedSplashScreen({ children, image }) {
-  const animation = React.useMemo(() => new Animated.Value(1), []);
-  const [isAppReady, setAppReady] = React.useState(false);
-  const [isSplashAnimationComplete, setAnimationComplete] = React.useState(
-    false
-  );
-
-  React.useEffect(() => {
-    if (isAppReady) {
-      Animated.timing(animation, {
-        toValue: 0,
-        duration: 200,
-        useNativeDriver: true,
-      }).start(() => setAnimationComplete(true));
-    }
-  }, [isAppReady]);
-
-  const onImageLoaded = React.useMemo(() => async () => {
-    SplashScreen.hideAsync();
-    try {
-      // Load stuff
-      await Promise.all([]);
-    } catch (e) {
-      // handle errors
-    } finally {
-      setAppReady(true);
-    }
-  });
-
-  return (
-    <View style={{ flex: 1 }}>
-      {isAppReady && children}
-      {!isSplashAnimationComplete && (
-        <Animated.View
-          pointerEvents="none"
-          style={[
-            StyleSheet.absoluteFill,
-            {
-              backgroundColor: Constants.manifest.splash.backgroundColor,
-              opacity: animation,
-            },
-          ]}
-        >
-          <Animated.Image
-            style={{
-              width: "100%",
-              height: "100%",
-              resizeMode: Constants.manifest.splash.resizeMode || "contain",
-              transform: [
-                {
-                  scale: animation,
-                },
-              ],
-            }}
-            source={image}
-            onLoadEnd={onImageLoaded}
-            fadeDuration={0}
-          />
-        </Animated.View>
-      )}
-    </View>
-  );
-}
-
-function MainScreen() {
-  return (
-    <View
-      style={{
-        flex: 1,
-        backgroundColor: "plum",
-        alignItems: "center",
-        justifyContent: "center",
-      }}
-    >
-      <Text
-        style={{
-          color: "black",
-          fontSize: 30,
-          marginBottom: 15,
-          fontWeight: "bold",
-        }}
-      >
-        Pretty Cool!
-      </Text>
-      {/* reenable after Updates.reloadAsync() is allowed in dev mode */}
-      {false && (
-        <Button title="Run Again" onPress={() => Updates.reloadAsync()} />
-      )}
-    </View>
-  );
-}
+const style = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+    width: '100%',
+    flexDirection: 'row',
+    justifyContent: 'space-between'
+  },
+  logo: {
+    // paddingLeft: 50,
+    // paddingRight: 50
+  },
+  camera: {
+    paddingBottom: 8,
+    paddingLeft: 10
+  },
+  igtv: {
+    paddingBottom: 8,
+    paddingRight: 15
+  },
+  send: {
+    paddingBottom: 8,
+    paddingRight: 10
+  }
+})

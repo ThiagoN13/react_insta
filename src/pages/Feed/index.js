@@ -53,7 +53,7 @@ export default function Feed({ navigation }) {
   }
 
   function addComment(item, text, index = -1) {
-    item.comments.push({
+    item.comments.unshift({
       id: item.comments.length + 1,
       userName,
       userPhoto: 'https://www.w3schools.com/howto/img_avatar.png',
@@ -111,7 +111,7 @@ export default function Feed({ navigation }) {
   }, []);
 
   function loadItem(item) {
-    const isImage = Boolean(item.feedPhoto)
+    const isImage = Boolean(item.feedPhoto , item.feedPhoto2)
 
     if (isImage) {
       return (
@@ -120,6 +120,7 @@ export default function Feed({ navigation }) {
           shouldLoad={viewable.includes(item.id)}
           smallSource={{ uri: item.feedPhotoMini }}
           source={{ uri: item.feedPhoto }}
+          source={{ uri: item.feedPhoto2 }}
         />
       )
     }
@@ -157,7 +158,7 @@ export default function Feed({ navigation }) {
             <View style={styles.leftActions}>
               {renderLikeItem(item)}
 
-              <TouchableOpacity onPress={() => navigation.navigate('Comments')} style={styles.action}>
+              <TouchableOpacity onPress={() => navigation.navigate('Comments', { item, addComment })}>
                 <Image
                   source={comment}
                 />

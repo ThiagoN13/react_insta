@@ -81,6 +81,16 @@ export default function Feed({ navigation }) {
 
     setFeed(feed);
   }
+  
+    function unlikePost(item){
+    const indice = item.likes.findIndex(like => like.userName == userName)
+
+     item.likes.splice(indice, 1)
+
+     const index = feed.findIndex(row => row.id === item.id)
+
+    feed[index] = item
+  }
 
   function liked(item) {
     return item.likes.some(row => row.userName == userName)
@@ -89,7 +99,7 @@ export default function Feed({ navigation }) {
   function renderLikeItem(item) {
     if (liked(item)) {
       return (
-        <TouchableOpacity onPress={() => likePost(item)} style={styles.action}>
+        <TouchableOpacity onPress={() => unlikePost(item)} style={styles.action}>
           <Image
             source={redLike}
           />
